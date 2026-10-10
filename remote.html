@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RanggaCryzHack Remote</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#080d12;color:#d8ffe5;font-family:monospace}
+main{max-width:500px;margin:auto}
+header{padding:20px;border:1px solid #16472b;border-radius:14px;background:#0c1711}
+h1{font-size:23px;color:#55ff91;margin:0 0 8px}
+p{color:#a6c9b1;line-height:1.6}
+.card{margin-top:16px;padding:18px;border:1px solid #16472b;background:#0b130e;border-radius:12px}
+input{width:100%;padding:13px;border:1px solid #28543a;border-radius:8px;background:#080d09;color:#e1ffe9;font-size:15px}
+button{width:100%;padding:14px;margin-top:10px;border:1px solid #287644;border-radius:8px;background:#12331e;color:#8bffb0;font-size:14px;font-weight:bold}
+button:disabled{opacity:.35}
+.red{background:#321519;border-color:#75353b;color:#ff9ca5}
+.blue{background:#102545;border-color:#27578e;color:#9bcaff}
+.purple{background:#261333;border-color:#673c8d;color:#e4b8ff}
+#status{color:#ffcf70;font-weight:bold;line-height:1.6}
+#notice{font-size:12px;color:#82998a;line-height:1.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid button{margin-top:8px}
+progress{accent-color:#55ff91}
+
+/* FIX: pesan admin harus terbaca */
+#screenLockCard label[for="screenLockMessage"] {
+  display:block!important;
+  color:#00ff88!important;
+  margin:12px 0 8px!important;
+  font-weight:bold!important;
+}
+#screenLockCard textarea#screenLockMessage {
+  display:block!important;
+  width:100%!important;
+  min-height:100px!important;
+  box-sizing:border-box!important;
+  padding:12px!important;
+  background:#061006!important;
+  color:#eafff0!important;
+  -webkit-text-fill-color:#eafff0!important;
+  border:1px solid #00ff66!important;
+  border-radius:8px!important;
+  font:15px monospace!important;
+  opacity:1!important;
+}
+#screenLockCard textarea#screenLockMessage::placeholder {
+  color:#9bbba5!important;
+  -webkit-text-fill-color:#9bbba5!important;
+  opacity:1!important;
+}
+
+/* AUTO LOCK PANEL STYLE */
+
+#screenLockCard label {display:block;color:#00ff88;margin:10px 0 6px;font-weight:bold}
+#screenLockCard input,#screenLockCard textarea {
+ display:block;width:100%;box-sizing:border-box;padding:12px;
+ color:#eafff0;background:#061006;border:1px solid #00ff66;
+ border-radius:8px;font:15px monospace;margin-bottom:10px
+}
+#screenLockCard textarea {min-height:80px;resize:vertical}
+
+
+/* FIX-PESAN-ADMIN */
+#screenLockCard label {
+  display:block!important;color:#00ff88!important;
+  margin:12px 0 6px!important;font-weight:bold!important
+}
+#screenLockCard input#screenLockPin,
+#screenLockCard textarea#screenLockMessage {
+  display:block!important;width:100%!important;
+  min-height:44px;box-sizing:border-box!important;
+  padding:12px!important;background:#061006!important;
+  color:#eafff0!important;-webkit-text-fill-color:#eafff0!important;
+  border:1px solid #00ff66!important;border-radius:8px!important;
+  font:16px monospace!important;opacity:1!important
+}
+#screenLockCard textarea#screenLockMessage {
+  min-height:90px!important;resize:vertical
+}
+#screenLockCard textarea#screenLockMessage::placeholder {
+  color:#9bbba5!important;-webkit-text-fill-color:#9bbba5!important;
+  opacity:1!important
+}
+
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>RANGGACRYZHACK</h1>
+  <p>REMOTE CONTROL • WEB DEMO</p>
+  <div id="status">Menyambungkan ke server...</div>
+</header>
+
+<div class="card">
+  <h3>🔐 Admin Login</h3>
+  <p>Masukkan PIN admin yang ditetapkan saat server Termux dijalankan.</p>
+  <input id="pin" type="password" placeholder="PIN admin">
+  <button id="loginButton">HUBUNGKAN ADMIN</button>
+</div>
+
+<div class="card">
+  <h3>👻 Efek Visual</h3>
+  <p id="targetInfo">Login admin untuk memulai.</p>
+  <div class="grid">
+    <button data-effect="jump" class="red" disabled>JUMPSCARE 👻</button>
+    <button data-effect="virus" class="red" disabled>FAKE VIRUS ⚠️</button>
+    <button data-effect="glitch" class="purple" disabled>GLITCH</button>
+    <button data-effect="bsod" class="blue" disabled>ERROR SCREEN</button>
+  </div>
+  <button data-effect="clear" disabled>HENTIKAN SEMUA EFEK</button>
+</div>
+
+<div class="card">
+  <h3>🎬 Video Tersimpan</h3>
+  <p>Pilih video MP4 dan unggah satu kali. Setelah tersimpan di server, kamu bisa mengirimkannya lagi tanpa mengunggah ulang.</p>
+
+  <input id="videoFile" type="file" accept=".mp4,video/mp4">
+
+  <button id="uploadVideo" class="blue" disabled>
+    ⬆ UPLOAD VIDEO SEKALI
+  </button>
+
+  <progress id="uploadProgress" value="0" max="100"
+    style="width:100%;margin-top:12px;display:none"></progress>
+
+  <p id="uploadStatus" role="status">
+    Login admin terlebih dahulu.
+  </p>
+
+  <button id="playStored" disabled>
+    ▶ KIRIM VIDEO TERSIMPAN
+  </button>
+
+  <button data-effect="stopvideo" class="red" disabled>
+    ■ STOP VIDEO
+  </button>
+</div>
+
+<div class="card">
+  <h3>💬 Pesan Khusus</h3>
+  <input id="customMessage" maxlength="180"
+    placeholder="Tulis pesan yang ingin ditampilkan...">
+  <button id="sendCustom" data-effect="custom" disabled>
+    KIRIM PESAN
+  </button>
+</div>
+
+<div class="card">
+  <p id="notice">
+    Efek hanya ditampilkan di halaman demo yang terhubung.
+    Video tersimpan di server sampai file dihapus. Halaman ini
+    tidak mengendalikan sistem Android atau memasang virus.
+  </p>
+</div>
+
+
+
+<div class="card" id="screenLockCard">
+  <h3>🔒 Simulasi Kunci Layar</h3>
+  <p>Masukkan PIN dan pesan. Keduanya diterapkan saat tombol kunci ditekan.</p>
+  <label for="screenLockPin">PIN custom (4–12 angka)</label>
+  <input id="screenLockPin" type="password" inputmode="numeric"
+    pattern="[0-9]*" maxlength="12" autocomplete="off"
+    placeholder="Buat PIN kunci">
+  <label for="screenLockMessage">Pesan yang ditampilkan di target</label>
+  <textarea id="screenLockMessage" maxlength="300" rows="3"
+    placeholder="Tulis pesan untuk ditampilkan saat terkunci"></textarea>
+  <button id="sendLockMessage" type="button">📨 KIRIM PESAN</button>
+  <button id="saveLockPin" hidden disabled>SIMPAN PIN</button>
+  <button id="lockTarget" class="red" disabled>🔒 KUNCI LAYAR TARGET</button>
+  <button id="unlockTarget" disabled>🔓 BUKA KUNCI TARGET</button>
+  <p id="lockStatus" role="status">Login admin terlebih dahulu.</p>
+</div>
+
+
+<div class="card" id="stageNoticeCard">
+ <h2>NOTIFIKASI STAGE TARGET</h2>
+ <div id="stageNotice" role="status" aria-live="polite"
+      style="padding:12px;border:1px solid #00ff66;color:#00ff66;background:#061006;border-radius:8px">
+  Menunggu laporan stage dari target...
+ </div>
+</div>
+
+<!-- RANGGACRYZHACK QUIZ PREVIEW -->
+<div class="card" id="previewCard">
+  <h2>PRATINJAU HALAMAN KUIS</h2>
+  <p style="color:#00ff66">Sesi pratinjau terpisah dari target.</p>
+  <button type="button" onclick="refreshQuizPreview()"
+    style="width:100%;padding:12px;background:#00ff66;color:#000;border:0;border-radius:6px;font-weight:bold">
+    REFRESH PRATINJAU
+  </button>
+  <iframe id="quizPreview" src="/target.html"
+    title="Pratinjau halaman kuis"
+    style="display:block;width:100%;height:480px;margin-top:12px;background:#000;border:1px solid #00ff66;border-radius:8px">
+  </iframe>
+</div>
+
+</main>
+
+<script>
+let ws=null;
+let authenticated=false;
+let targetCount=0;
+let uploading=false;
+
+const statusEl=document.getElementById("status");
+const targetInfo=document.getElementById("targetInfo");
+const uploadButton=document.getElementById("uploadVideo");
+const playButton=document.getElementById("playStored");
+const uploadStatus=document.getElementById("uploadStatus");
+const progress=document.getElementById("uploadProgress");
+const buttons=[...document.querySelectorAll("[data-effect]")];
+
+function ready(){
+ return authenticated &&
+ targetCount>0 &&
+ ws &&
+ ws.readyState===WebSocket.OPEN;
+}
+
+function updateUI(){
+ const connected=ready();
+
+ buttons.forEach(b=>b.disabled=!connected);
+ document.getElementById("loginButton").disabled=
+   !ws || ws.readyState!==WebSocket.OPEN;
+
+ uploadButton.disabled=!connected || uploading;
+ playButton.disabled=!connected || uploading;
+
+ if(!authenticated){
+   statusEl.textContent=ws&&ws.readyState===WebSocket.OPEN
+     ?"SERVER TERHUBUNG • LOGIN ADMIN"
+     :"MENGHUBUNGKAN KE SERVER...";
+   targetInfo.textContent="Masuk sebagai admin terlebih dahulu.";
+ }else if(targetCount===0){
+   statusEl.textContent="ADMIN TERHUBUNG • MENUNGGU TARGET";
+   targetInfo.textContent="Belum ada tab target yang terhubung.";
+ }else{
+   statusEl.textContent="ADMIN TERHUBUNG";
+   targetInfo.textContent=targetCount+" tab target terhubung.";
+ }
+}
+
+function connect(){
+ const proto=location.protocol==="https:"?"wss:":"ws:";
+ ws=new WebSocket(proto+"//"+location.host+"/?role=admin");
+
+ ws.onopen=()=>{
+   updateUI();
+   targetInfo.textContent="WebSocket tersambung. Silakan login admin.";
+ };
+
+
+ ws.onmessage=e=>{
+   let d;
+   try{d=JSON.parse(e.data)}catch{return}
+
+   if(d.type==="auth"){
+     authenticated=!!d.ok;
+     if(d.ok){
+       targetInfo.textContent="Login berhasil.";
+     }else{
+       targetInfo.textContent="PIN salah. Coba lagi.";
+     }
+     updateUI();
+   }else if(d.type==="targets"){
+     targetCount=d.count;
+     updateUI();
+   }else if(d.type==="quiz-progress"){
+     const box=document.getElementById("stageNotice");
+     if(box){
+       const stage=d.stage==="selesai"?"KUIS SELESAI":
+         d.stage==="menjawab"?"SEDANG MENJAWAB":
+         "SEDANG MENGERJAKAN";
+       box.textContent="Target mencapai stage "+d.current+
+         " dari "+d.total+" · "+stage+
+         " · Terjawab "+d.answered+"/"+d.total;
+     }
+   }else if(d.type==="lock-pin-status"){
+     document.getElementById("lockStatus").textContent=d.message;
+   }else if(d.type==="sent"){
+     const statusMessage = d.targets > 0
+       ? "Perintah " + d.effect + " dikirim ke " + d.targets + " target."
+       : "Tidak ada halaman target yang terhubung.";
+     targetInfo.textContent = statusMessage;
+     if (d.effect === "screen-lock" || d.effect === "screen-unlock") {
+       document.getElementById("lockStatus").textContent = statusMessage;
+     }
+   }
+ };
+
+ ws.onclose=()=>{
+   authenticated=false;
+   targetCount=0;
+   updateUI();
+   setTimeout(connect,2000);
+ };
+
+ ws.onerror=()=>{
+   targetInfo.textContent="WebSocket gagal. Periksa server dan URL tunnel.";
+   ws.close();
+ };
+
+}
+
+function login(){
+ if(!ws||ws.readyState!==WebSocket.OPEN){
+   targetInfo.textContent="Server belum tersambung.";
+   return;
+ }
+ ws.send(JSON.stringify({
+   type:"auth",
+   pin:document.getElementById("pin").value
+ }));
+}
+
+function sendEffect(type){
+ if(!ready())return;
+
+ const packet={type};
+
+ if(type==="custom"){
+   packet.message=document.getElementById("customMessage").value.trim();
+   if(!packet.message){
+     targetInfo.textContent="Tulis pesan terlebih dahulu.";
+     return;
+   }
+ }
+
+ ws.send(JSON.stringify(packet));
+}
+
+/* Upload hanya menyimpan video.
+   Tidak otomatis mengirim atau memutar video. */
+uploadButton.addEventListener("click",()=>{
+ const file=document.getElementById("videoFile").files[0];
+
+ if(!authenticated){
+   uploadStatus.textContent="Login admin terlebih dahulu.";
+   return;
+ }
+
+ if(!file){
+   uploadStatus.textContent="Pilih file MP4 terlebih dahulu.";
+   return;
+ }
+
+ if(!/\.mp4$/i.test(file.name) ||
+    (file.type && file.type!=="video/mp4")){
+   uploadStatus.textContent="Pilih file MP4 yang valid.";
+   return;
+ }
+
+ if(file.size>100*1024*1024){
+   uploadStatus.textContent="File terlalu besar. Maksimum 100 MB.";
+   return;
+ }
+
+ const xhr=new XMLHttpRequest();
+ const pin=document.getElementById("pin").value;
+
+ uploading=true;
+ progress.style.display="block";
+ progress.value=0;
+ uploadStatus.textContent="Mengunggah video...";
+ updateUI();
+
+ xhr.open("POST","/api/upload-video");
+ xhr.setRequestHeader("Content-Type","video/mp4");
+ xhr.setRequestHeader("X-Admin-Pin",pin);
+
+ xhr.upload.onprogress=event=>{
+   if(event.lengthComputable){
+     progress.value=Math.round(event.loaded/event.total*100);
+     uploadStatus.textContent="Mengunggah: "+progress.value+"%";
+   }
+ };
+
+ xhr.onload=()=>{
+   let result={};
+   try{result=JSON.parse(xhr.responseText)}catch{}
+
+   if(xhr.status===200 && result.ok){
+     uploadStatus.textContent=
+       "✅ Video berhasil disimpan! Tekan KIRIM VIDEO TERSIMPAN kapan saja.";
+   }else{
+     uploadStatus.textContent=
+       result.error||"Upload gagal ("+xhr.status+").";
+   }
+ };
+
+ xhr.onerror=()=>{
+   uploadStatus.textContent="Koneksi gagal. Periksa server dan jaringan.";
+ };
+
+ xhr.onloadend=()=>{
+   uploading=false;
+   updateUI();
+ };
+
+ xhr.send(file);
+});
+
+/* Kirim ulang video yang sudah ada di server tanpa upload. */
+playButton.addEventListener("click",()=>{
+ if(!ready()){
+   uploadStatus.textContent="Login admin dan hubungkan target dahulu.";
+   return;
+ }
+
+ ws.send(JSON.stringify({type:"playuploaded"}));
+ uploadStatus.textContent=
+   "Perintah pemutaran dikirim. Jika video belum muncul, periksa file tersimpan dan halaman target.";
+});
+
+buttons.forEach(button=>{
+ button.addEventListener("click",()=>{
+   sendEffect(button.dataset.effect);
+ });
+});
+
+const lockPinInput = document.getElementById("screenLockPin");
+const saveLockPinButton = document.getElementById("saveLockPin");
+const lockTargetButton = document.getElementById("lockTarget");
+const unlockTargetButton = document.getElementById("unlockTarget");
+const lockStatus = document.getElementById("lockStatus");
+
+document.getElementById("sendLockMessage").addEventListener("click", () => {
+  if (!ready()) {
+    lockStatus.textContent = "Admin belum terhubung ke server.";
+    return;
+  }
+  const message = document.getElementById("screenLockMessage").value.trim();
+  if (!message) {
+    lockStatus.textContent = "Tulis pesan terlebih dahulu.";
+    return;
+  }
+  ws.send(JSON.stringify({
+    type: "screen-message",
+    message: message.slice(0, 300)
+  }));
+  lockStatus.textContent = "Mengirim pesan ke Target...";
+});
+
+
+function updateLockButtons() {
+  const connected = ready();
+  saveLockPinButton.disabled = !connected;
+  lockTargetButton.disabled = !connected;
+  unlockTargetButton.disabled = !connected;
+}
+const originalUpdateUI = updateUI;
+updateUI = function() {
+  originalUpdateUI();
+  updateLockButtons();
+};
+
+saveLockPinButton.addEventListener("click", () => {
+  if (!ready()) return;
+  const pin = lockPinInput.value.trim();
+  if (!/^[0-9]{4,12}$/.test(pin)) {
+    lockStatus.textContent = "PIN harus 4–12 angka.";
+    return;
+  }
+  ws.send(JSON.stringify({type:"set-lock-pin", pin}));
+  lockPinInput.value = "";
+  lockStatus.textContent = "Mengirim pengaturan PIN...";
+});
+
+lockTargetButton.addEventListener("click", () => {
+  if (!ready()) {
+    lockStatus.textContent = "Admin belum terhubung ke server.";
+    return;
+  }
+
+  const panel = document.getElementById("screenLockCard");
+  const pin = panel.querySelector("#screenLockPin").value.trim();
+  const message = panel.querySelector("#screenLockMessage").value.trim();
+
+  if (!/^[0-9]{4,12}$/.test(pin)) {
+    lockStatus.textContent = "PIN wajib 4–12 angka.";
+    return;
+  }
+  if (!message) {
+    lockStatus.textContent = "Kolom pesan masih kosong.";
+    return;
+  }
+
+  ws.send(JSON.stringify({
+    type: "screen-lock",
+    pin: pin,
+    message: message.slice(0, 300)
+  }));
+
+  lockStatus.textContent = "Mengirim PIN dan pesan ke server...";
+});
+
+unlockTargetButton.addEventListener("click", () => {
+  if (!ready()) return;
+  ws.send(JSON.stringify({type:"screen-unlock"}));
+  lockStatus.textContent = "Perintah buka kunci dikirim.";
+});
+
+document.getElementById("loginButton").addEventListener("click",login);
+
+document.getElementById("pin").addEventListener("keydown",e=>{
+ if(e.key==="Enter")login();
+});
+
+connect();
+</script>
+
+<script>
+function refreshQuizPreview() {
+  const frame = document.getElementById("quizPreview");
+  frame.src = "/target.html?t=" + Date.now();
+}
+</script>
+
+</body>
+</html>

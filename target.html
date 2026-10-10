@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Tebak Yuk! - Kuis berhadiah Robux</title>
+<style>
+*{box-sizing:border-box}
+:root{
+ --purple:#7657e8;--pink:#ff65a7;--blue:#49bafa;
+ --yellow:#ffce58;--green:#31bd83;--ink:#393352
+}
+body{
+ margin:0;min-height:100vh;padding:14px 12px 28px;
+ font-family:Arial,sans-serif;color:var(--ink);
+ background:linear-gradient(145deg,#b8f1ff,#e9d9ff 48%,#ffe0ed);
+ overflow-x:hidden
+}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid #393352;outline-offset:3px}
+.app{max-width:540px;margin:auto;position:relative}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:3px 2px 14px}
+.brand{font-size:13px;font-weight:900;letter-spacing:1px;color:#6551c9}
+.pill{background:#ffffffd9;border:2px solid white;border-radius:30px;padding:8px 11px;font-size:12px;font-weight:bold}
+.hero{
+ text-align:center;padding:20px 14px;border:3px solid white;
+ border-radius:28px;background:linear-gradient(140deg,#ffb8d9,#d8c9ff 65%,#b8edff);
+ box-shadow:0 7px 0 #7864bf30;margin-bottom:14px
+}
+.mascot{font-size:45px;line-height:1.2}
+h1{font-size:clamp(27px,7vw,36px);margin:8px 0;color:#5945b2}
+.hero p{font-size:14px;line-height:1.6;margin:6px 0 0;font-weight:bold}
+.card{
+ background:#ffffffef;border:2px solid white;border-radius:24px;
+ padding:18px;box-shadow:0 7px 0 #7864bf24;margin-bottom:14px
+}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.label{font-size:12px;font-weight:900;letter-spacing:1px;color:#7860d9}
+.small{font-size:12px;font-weight:bold;color:#77718f}
+.progress{height:11px;background:#ece7ff;border-radius:20px;overflow:hidden;margin:12px 0 18px}
+#progressFill{height:100%;width:0%;border-radius:20px;background:linear-gradient(90deg,#ff70b1,#9067ff,#4acbff);transition:width .25s}
+#question{font-size:21px;line-height:1.45;margin:10px 0 17px;color:#393352}
+.options{display:grid;gap:10px}
+.option{
+ display:flex;align-items:center;gap:11px;text-align:left;width:100%;
+ border:2px solid #e8e4fa;background:#fff;border-radius:15px;
+ padding:12px;color:#403a5d;font-weight:bold;min-height:53px;
+ transition:transform .12s,border-color .12s
+}
+.option:active{transform:scale(.985)}
+.letter{
+ display:flex;align-items:center;justify-content:center;flex-shrink:0;
+ width:32px;height:32px;border-radius:10px;background:#eee9ff;color:#7254d9;
+ font-weight:900
+}
+.option:nth-child(2) .letter{background:#ffe6f1;color:#df438b}
+.option:nth-child(3) .letter{background:#dff5ff;color:#2384bd}
+.option:nth-child(4) .letter{background:#fff1cc;color:#a87500}
+.option.correct{border-color:#35bf85;background:#eafff4}
+.option.correct .letter{background:#35bf85;color:white}
+.option.wrong{border-color:#ff7990;background:#fff0f2}
+.option.wrong .letter{background:#ff7990;color:white}
+.option:disabled{cursor:default}
+#feedback{
+ display:none;margin-top:14px;padding:12px;border-radius:13px;
+ font-size:14px;line-height:1.55;font-weight:bold
+}
+.action{
+ display:block;width:100%;border:0;border-radius:14px;padding:14px;
+ margin-top:14px;background:linear-gradient(100deg,#8164ee,#5c7df3);
+ color:white;font-weight:900;font-size:16px;box-shadow:0 4px 0 #5845b9
+}
+.action:active{transform:translateY(2px);box-shadow:0 2px 0 #5845b9}
+#nextBtn{display:none}
+#startScreen{text-align:center}
+#startScreen .emoji{font-size:60px}
+#startScreen p{line-height:1.7;color:#6d6883;font-size:14px}
+.bubble{display:inline-block;background:#fff0a9;padding:7px 12px;border-radius:20px;font-weight:bold;font-size:12px;margin:3px}
+#resultScreen{display:none;text-align:center}
+#resultEmoji{font-size:68px}
+#finalScore{font-size:46px;color:#7153db;font-weight:900;margin:10px 0}
+.resultText{font-size:15px;line-height:1.7;color:#68627e}
+footer{text-align:center;font-size:12px;color:#746c96;padding:12px}
+
+/* Lapisan efek demo dikendalikan remote */
+#videoLayer[hidden],#effectLayer[hidden]{display:none!important}
+#videoLayer{
+ position:fixed;inset:0;z-index:100000;background:#000;color:white;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ padding:12px;font-family:Arial,sans-serif
+}
+#remoteVideo{display:block;width:100%;height:100%;max-height:100vh;object-fit:contain}
+#effectLayer{
+ position:fixed;inset:0;z-index:99999;display:flex;
+ align-items:center;justify-content:center;text-align:center;
+ padding:24px;color:white;background:#07030d;font-family:Arial,sans-serif
+}
+.effect-content{width:min(500px,100%)}
+#effectSymbol{font-size:clamp(70px,22vw,150px);margin-bottom:12px}
+#effectTitle{font-size:clamp(30px,9vw,55px);margin:10px 0}
+#effectMessage{font-size:18px;line-height:1.5;overflow-wrap:anywhere}
+#effectNotice{display:block;font-size:12px;margin-top:20px;opacity:.8}
+.fx-jump{background:radial-gradient(circle,#7b003d,#07030d 65%)!important}
+.fx-virus{background:#001500!important;color:#6dff73!important}
+.fx-virus #effectTitle{font-family:monospace;font-size:clamp(23px,7vw,42px)}
+.fx-glitch{background:#080808!important;color:#ff4c70!important}
+.fx-glitch #effectTitle{animation:glitch .12s infinite alternate;text-shadow:4px 0 red,-4px 0 cyan}
+.fx-bsod{background:#075dc9!important;color:white!important}
+.fx-custom{background:#15152b!important}
+.scanbar{width:min(350px,90%);height:14px;background:#163616;border:1px solid #51e65d;margin:20px auto;display:none;overflow:hidden}
+.fx-virus .scanbar{display:block}
+.scanbar span{display:block;height:100%;width:100%;background:#54ff62;transform-origin:left;animation:scan 3s linear infinite}
+@keyframes scan{0%{transform:scaleX(.02)}100%{transform:scaleX(1)}}
+@keyframes glitch{from{transform:translateX(-3px)}to{transform:translateX(3px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+#screenLock[hidden]{display:none!important}
+#screenLock{
+ position:fixed;inset:0;z-index:100001;background:#10131b;color:#fff;
+ display:flex;align-items:center;justify-content:center;padding:22px;
+ font-family:Arial,sans-serif;text-align:center
+}
+.lockBox{width:min(380px,100%);padding:24px;border:1px solid #454d60;
+ border-radius:20px;background:#1a2030;box-shadow:0 12px 50px #0008}
+.lockIcon{font-size:54px}
+.lockBox h2{font-size:25px}
+.lockBox p{color:#c6cede;line-height:1.5}
+.lockBox input{width:100%;padding:14px;border-radius:10px;
+ border:1px solid #65718b;background:#0d111a;color:white;
+ font-size:20px;text-align:center;letter-spacing:5px}
+.lockBox button{width:100%;padding:13px;margin-top:12px;
+ border:0;border-radius:10px;background:#6e83ff;color:white;font-weight:bold}
+#unlockFeedback{min-height:20px;color:#ffd37a;font-size:13px}
+#leaveLockDemo{background:#343b4b!important}
+
+/* FIX: pesan custom target harus terlihat */
+#lockMessageText {
+  display:block!important;
+  min-height:24px!important;
+  margin:12px 0!important;
+  padding:12px!important;
+  background:#07130d!important;
+  color:#aaffc8!important;
+  -webkit-text-fill-color:#aaffc8!important;
+  border:1px solid #00ff66!important;
+  border-radius:10px!important;
+  font-size:16px!important;
+  font-weight:bold!important;
+  line-height:1.5!important;
+  overflow-wrap:anywhere!important;
+  white-space:pre-wrap!important;
+}
+
+
+.customLockMessage {
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  min-height:48px;
+  margin:14px 0;
+  padding:13px;
+  border:1px solid #00ff66;
+  border-radius:10px;
+  background:#07130d;
+  color:#b8ffce;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+  line-height:1.5;
+  font-size:15px;
+}
+\n
+/* FIX-PESAN-TARGET */
+#lockMessageText.customLockMessage {
+  display:block!important;box-sizing:border-box!important;width:100%!important;
+  min-height:42px!important;margin:14px 0!important;padding:13px!important;
+  border:1px solid #00ff66!important;border-radius:10px!important;
+  background:#07130d!important;color:#b8ffce!important;
+  -webkit-text-fill-color:#b8ffce!important;
+  overflow-wrap:anywhere!important;white-space:pre-wrap!important;
+  line-height:1.5!important;font-size:16px!important;font-weight:bold!important
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+ <div class="top">
+  <div class="brand">🌈 TEBAK YUK!</div>
+  <div class="pill">⭐ <span id="scoreTop">0</span> poin</div>
+ </div>
+
+ <section class="hero">
+  <div class="mascot">🦊🎈</div>
+  <h1>Kuis Ceria!</h1>
+  <p>Siap menguji kecerdasanmu?</p>
+ </section>
+
+ <section class="card" id="startScreen">
+  <div class="emoji">🎮📚✨</div>
+  <h2>Petualangan 15 Soal</h2>
+  <p>Jawab pertanyaan tentang matematika, sains, bahasa, hewan, dan pengetahuan umum!</p>
+  <span class="bubble">🧠 Asah otak</span>
+  <span class="bubble">⭐ Kumpulkan poin</span>
+  <span class="bubble">🏆 Raih nilai terbaik</span>
+  <button class="action" onclick="startQuiz()">MULAI KUIS 🚀</button>
+ </section>
+
+ <section class="card" id="quizScreen" style="display:none">
+  <div class="row">
+   <div class="label" id="number">SOAL 1 DARI 15</div>
+   <div class="small" id="answered">Belum dijawab</div>
+  </div>
+  <div class="progress"><div id="progressFill"></div></div>
+  <h2 id="question"></h2>
+  <div class="options" id="options"></div>
+  <div id="feedback" role="status" aria-live="polite"></div>
+  <button class="action" id="nextBtn" onclick="nextQuestion()">SOAL BERIKUTNYA ➜</button>
+ </section>
+
+ <section class="card" id="resultScreen">
+  <div id="resultEmoji">🏆</div>
+  <h2>Kuis Selesai!</h2>
+  <div id="finalScore">0 / 15</div>
+  <p class="resultText" id="resultText"></p>
+  <button class="action" onclick="restartQuiz()">MAIN LAGI 🔄</button>
+ </section>
+ <footer>💖 Belajar itu seru! Terus semangat, ya!</footer>
+</div>
+
+<div id="screenLock" hidden>
+ <div class="lockBox">
+  
+
+  <div class="lockIcon">🔒</div>
+  <h2>Halaman Sedang Dikunci</h2>
+  <div id="lockMessageText" class="customLockMessage">
+    Menunggu pesan dari admin...
+  </div>
+  
+  
+  
+  <form id="unlockForm">
+   <input id="unlockPin" type="password" inputmode="numeric"
+     maxlength="12" autocomplete="off" placeholder="Masukkan PIN"
+     aria-label="PIN simulasi" required>
+   <button type="submit">BUKA KUNCI</button>
+  </form>
+  <p id="unlockFeedback" role="status" aria-live="polite"></p>
+ </div>
+</div>
+
+<!-- Remote tetap dapat menghentikan efek dan video. -->
+<div id="videoLayer" hidden>
+ <video id="remoteVideo" playsinline webkit-playsinline preload="metadata"></video>
+</div>
+
+<div id="effectLayer" hidden>
+ <div class="effect-content">
+  <div id="effectSymbol">👻</div>
+  <h1 id="effectTitle">BOO!</h1>
+  <p id="effectMessage">Jumpscare demo!</p>
+  <div class="scanbar"><span></span></div>
+  <small id="effectNotice"></small>
+ </div>
+</div>
+
+<script>
+const questions=[
+ {q:"Berapakah hasil dari 7 × 8?",o:["54","56","64","48"],a:1,why:"7 × 8 = 56."},
+ {q:"Planet tempat kita tinggal adalah ...",o:["Mars","Venus","Bumi","Jupiter"],a:2,why:"Manusia tinggal di planet Bumi."},
+ {q:"Lawan kata dari 'rajin' adalah ...",o:["Malas","Tekun","Pintar","Cermat"],a:0,why:"Lawan kata rajin adalah malas."},
+ {q:"Hewan yang mengalami metamorfosis dari ulat menjadi kupu-kupu adalah ...",o:["Kucing","Kupu-kupu","Ayam","Ikan"],a:1,why:"Kupu-kupu berkembang melalui tahap telur, ulat, kepompong, lalu kupu-kupu dewasa."},
+ {q:"Berapakah hasil dari 125 + 75?",o:["175","190","200","210"],a:2,why:"125 + 75 = 200."},
+ {q:"Alat untuk mengukur suhu adalah ...",o:["Penggaris","Termometer","Kompas","Timbangan"],a:1,why:"Termometer digunakan untuk mengukur suhu."},
+ {q:"Dalam satu minggu terdapat ...",o:["5 hari","6 hari","7 hari","8 hari"],a:2,why:"Satu minggu terdiri dari tujuh hari."},
+ {q:"Bagian tumbuhan yang biasanya menyerap air dari tanah adalah ...",o:["Bunga","Daun","Buah","Akar"],a:3,why:"Akar menyerap air dan mineral dari tanah."},
+ {q:"Manakah yang termasuk contoh sumber energi cahaya alami?",o:["Senter","Lampu meja","Matahari","Televisi"],a:2,why:"Matahari merupakan sumber cahaya alami."},
+ {q:"Jika sekarang pukul 07.00, dua jam kemudian pukul ...",o:["08.00","09.00","10.00","11.00"],a:1,why:"Dari pukul 07.00 ditambah dua jam menjadi pukul 09.00."},
+ {q:"Bahasa yang digunakan dalam kalimat 'Good morning' adalah ...",o:["Bahasa Indonesia","Bahasa Jepang","Bahasa Inggris","Bahasa Korea"],a:2,why:"'Good morning' adalah ungkapan dalam bahasa Inggris."},
+ {q:"Hewan yang dikenal memiliki belalai adalah ...",o:["Gajah","Jerapah","Zebra","Harimau"],a:0,why:"Gajah memiliki belalai yang digunakan untuk berbagai kegiatan."},
+ {q:"Warna yang dihasilkan dari campuran merah dan kuning adalah ...",o:["Hijau","Ungu","Jingga","Biru"],a:2,why:"Dalam pencampuran warna dasar yang umum diajarkan, merah dan kuning menghasilkan jingga."},
+ {q:"Berapakah jumlah sisi pada sebuah segitiga?",o:["2","3","4","5"],a:1,why:"Segitiga memiliki tiga sisi dan tiga sudut."},
+ {q:"Saat menyeberang jalan, tindakan yang paling aman adalah ...",o:["Berlari tanpa melihat","Bermain di jalan","Menyeberang di tempat aman dan memperhatikan lalu lintas","Mengikuti kendaraan dari dekat"],a:2,why:"Gunakan tempat penyeberangan bila tersedia dan perhatikan lalu lintas sebelum menyeberang."}
+];
+
+let current=0,score=0,locked=false,finished=false;
+let progressSocket=null;
+let lastReportedStage="";
+function reportQuizProgress(stage){
+ if(!progressSocket || progressSocket.readyState!==WebSocket.OPEN)return;
+ const state={
+  type:"quiz-progress",
+  stage,
+  current:finished?questions.length:current+1,
+  total:questions.length,
+  answered:finished?questions.length:(locked?current+1:current)
+ };
+ progressSocket.send(JSON.stringify(state));
+}
+
+const $=id=>document.getElementById(id);
+
+function startQuiz(){
+ current=0;score=0;locked=false;finished=false;
+ $("scoreTop").textContent="0";
+ $("startScreen").style.display="none";
+ $("resultScreen").style.display="none";
+ $("quizScreen").style.display="block";
+ renderQuestion();
+}
+function renderQuestion(){
+ locked=false;
+ const item=questions[current];
+ $("number").textContent="SOAL "+(current+1)+" DARI "+questions.length;
+ $("answered").textContent="Pilih jawabanmu";
+ $("progressFill").style.width=(current/questions.length*100)+"%";
+ $("question").textContent=item.q;
+ reportQuizProgress("mengerjakan");
+ $("feedback").style.display="none";
+ $("nextBtn").style.display="none";
+ const area=$("options");area.replaceChildren();
+
+ item.o.forEach((option,index)=>{
+  const button=document.createElement("button");
+  button.className="option";
+  button.type="button";
+  const letter=document.createElement("span");
+  letter.className="letter";
+  letter.textContent=String.fromCharCode(65+index);
+  const label=document.createElement("span");
+  label.textContent=option;
+  button.append(letter,label);
+  button.addEventListener("click",()=>chooseAnswer(index));
+  area.appendChild(button);
+ });
+}
+function chooseAnswer(index){
+ if(locked||finished)return;
+ locked=true;
+ reportQuizProgress("menjawab");
+ const item=questions[current];
+ const buttons=$("options").querySelectorAll("button");
+ buttons.forEach((button,i)=>{
+  button.disabled=true;
+  if(i===item.a)button.classList.add("correct");
+  else if(i===index)button.classList.add("wrong");
+ });
+ const ok=index===item.a;
+ if(ok)score++;
+ $("scoreTop").textContent=score;
+ $("answered").textContent=ok?"Jawaban benar!":"Sudah dijawab";
+ const feedback=$("feedback");
+ feedback.style.display="block";
+ feedback.style.background=ok?"#e4fff1":"#fff0f2";
+ feedback.style.color=ok?"#177a50":"#a43b55";
+ feedback.textContent=(ok?"🎉 Hebat! Benar! ":"💪 Belum tepat. ")+item.why;
+ $("progressFill").style.width=((current+1)/questions.length*100)+"%";
+ $("nextBtn").textContent=current===questions.length-1?"LIHAT HASIL 🏆":"SOAL BERIKUTNYA ➜";
+ $("nextBtn").style.display="block";
+}
+let nextTimer=null;
+function nextQuestion(){
+ if(!locked||finished)return;
+
+ const btn=$("nextBtn");
+ btn.disabled=true;
+ btn.style.opacity=".85";
+
+ let remaining=5;
+ btn.textContent="Menyiapkan soal berikutnya... "+remaining;
+
+ if(nextTimer)clearInterval(nextTimer);
+ nextTimer=setInterval(()=>{
+  remaining--;
+  if(remaining>0){
+   btn.textContent="Menyiapkan soal berikutnya... "+remaining;
+   return;
+  }
+
+  clearInterval(nextTimer);
+  nextTimer=null;
+  btn.disabled=false;
+  btn.style.opacity="1";
+
+  current++;
+  if(current>=questions.length){
+   showResults();
+   return;
+  }
+  renderQuestion();
+ },1000);
+}
+function showResults(){
+ finished=true;
+ reportQuizProgress("selesai");
+ $("quizScreen").style.display="none";
+ $("resultScreen").style.display="block";
+ $("finalScore").textContent=score+" / "+questions.length;
+ const percent=Math.round(score/questions.length*100);
+ let emoji="💪",message="Terus berlatih, ya! Coba lagi dan kamu pasti bisa belajar lebih banyak.";
+ if(score>=13){emoji="🏆";message="Luar biasa! Kamu hebat sekali. Pengetahuanmu keren!";}
+ else if(score>=10){emoji="🌟";message="Bagus sekali! Kamu sudah menjawab banyak soal dengan benar.";}
+ else if(score>=7){emoji="🎉";message="Kerja bagus! Terus belajar supaya makin jago.";}
+ $("resultEmoji").textContent=emoji;
+ $("resultText").textContent="Nilaimu "+percent+"%. "+message;
+ $("progressFill").style.width="100%";
+}
+function restartQuiz(){startQuiz()}
+
+/* Fungsi video: tetap kompatibel dengan remote sebelumnya. */
+function stopRemoteVideo(){
+ const layer=$("videoLayer"),video=$("remoteVideo");
+ video.pause();
+ video.removeAttribute("src");
+ video.load();
+ layer.hidden=true;
+}
+function showRemoteVideo(name){
+ if(!/^(video[1-4]|shared-video)$/.test(name))return;
+ const layer=$("videoLayer"),video=$("remoteVideo");
+ $("effectLayer").hidden=true;
+ video.pause();
+ video.onerror=()=>console.error("Video gagal dimuat:",video.error);
+ video.src="/videos/"+name+".mp4";
+ video.controls=true;
+ video.playsInline=true;
+ video.muted=false;
+ video.volume=1;
+ layer.hidden=false;
+ video.load();
+ video.play().catch(err=>{
+  console.warn("Browser mungkin meminta pengguna menekan Play:",err.name);
+ });
+}
+
+/* Fungsi efek: tetap kompatibel dengan remote sebelumnya. */
+function clearEffect(){
+ $("effectLayer").hidden=true;
+ stopRemoteVideo();
+}
+function showEffect(type,message=""){
+ stopRemoteVideo();
+ const layer=$("effectLayer");
+ const symbol=$("effectSymbol");
+ const title=$("effectTitle");
+ const text=$("effectMessage");
+ const notice=$("effectNotice");
+ layer.className="";
+ symbol.textContent="";
+ notice.textContent="";
+ text.textContent="";
+ if(type==="jump"){
+  layer.className="fx-jump";
+  symbol.textContent="👹";
+  title.textContent="BOO!";
+  text.textContent="JUMPSCARE!";
+  notice.textContent="duar ini setan. tenang ini iklan";
+ }else if(type==="virus"){
+  layer.className="fx-virus";
+  symbol.textContent="⚠️";
+  title.textContent="VIRUS DETECTED";
+  text.textContent="Simulasi pemindaian browser...";
+  notice.textContent="INI BUKAN SIMULASI CEPAT HAPUS VIRUNYA DI PENGATURAN HP — YOUR PHONE GET VIRUS.";
+ }else if(type==="glitch"){
+  layer.className="fx-glitch";
+  symbol.textContent="▓▒░";
+  title.textContent="SIGNAL ERROR";
+  text.textContent="VISUAL GLITCH";
+  notice.textContent="ER00R";
+ }else if(type==="bsod"){
+  layer.className="fx-bsod";
+  symbol.textContent=":(";
+  title.textContent="OOPS!";
+  text.textContent="Demo halaman mengalami kesalahan visual.";
+  notice.textContent="sepertinya koneksi ke server mengalami masalah. harap refresh halaman.";
+ }else if(type==="custom"){
+  layer.className="fx-custom";
+  symbol.textContent="📢";
+  title.textContent="PESAN DARI ADMIN";
+  text.textContent=message||"Halo!";
+  notice.textContent="THANK YOU";
+ }else{
+  return;
+ }
+ layer.hidden=false;
+}
+
+function showScreenLock(message) {
+  const messageBox = $("lockMessageText");
+  const received = typeof message === "string" ? message : "";
+
+  if (messageBox) {
+    messageBox.textContent = received.trim()
+      ? received.slice(0, 300)
+      : "[DEBUG] Server mengirim pesan kosong.";
+  }
+
+  console.log("[SCREEN-LOCK TARGET] Pesan diterima:", JSON.stringify(message));
+  $("screenLock").hidden = false;
+  $("unlockPin").value = "";
+  $("unlockFeedback").textContent = "";
+}
+function hideScreenLock() {
+ $("screenLock").hidden = true;
+ $("unlockPin").value = "";
+ $("unlockFeedback").textContent = "";
+}
+$("unlockForm").addEventListener("submit", event => {
+ event.preventDefault();
+ if (!progressSocket || progressSocket.readyState !== WebSocket.OPEN) {
+   $("unlockFeedback").textContent = "Koneksi server terputus.";
+   return;
+ }
+ progressSocket.send(JSON.stringify({
+   type:"unlock-attempt",
+   pin:$("unlockPin").value
+ }));
+ $("unlockFeedback").textContent = "Memeriksa PIN...";
+});
+
+/* Koneksi WebSocket dan pesan remote dipertahankan. */
+
+
+function connect(){
+ const proto=location.protocol==="https:"?"wss:":"ws:";
+ const ws=new WebSocket(proto+"//"+location.host+"/?role=target");
+ progressSocket=ws;
+ ws.onopen=()=>console.log("[TARGET] WebSocket tersambung:", location.host);
+
+ ws.onmessage=e=>{
+  let d;
+  try{d=JSON.parse(e.data)}catch{return}
+  if(d.type==="screen-message"){
+   const box=$("lockMessageText");
+   if(box) box.textContent=String(d.message||"").trim()
+     || "Admin mengirim pesan kosong.";
+   $("screenLock").hidden=false;
+   $("unlockPin").value="";
+   $("unlockFeedback").textContent="";
+  }else if(d.type==="screen-lock"){
+   showScreenLock(d.message || "");
+  }else if(d.type==="screen-unlock"){
+   hideScreenLock();
+  }else if(d.type==="unlock-result"){
+   $("unlockFeedback").textContent = d.ok
+     ? "PIN benar."
+     : "PIN salah. Coba lagi.";
+  }else if(["jump","virus","glitch","bsod","custom"].includes(d.type)){
+   showEffect(d.type,d.message||"");
+  }else if(/^video[1-4]$/.test(d.type)){
+   showRemoteVideo(d.type);
+  }else if(d.type==="playuploaded"){
+   showRemoteVideo("shared-video");
+  }else if(d.type==="stopvideo"){
+   stopRemoteVideo();
+  }else if(d.type==="clear"){
+   clearEffect();
+  }
+ };
+ ws.onclose=()=>setTimeout(connect,2000);
+ ws.onerror=()=>{
+   console.error("[TARGET] WebSocket gagal:", location.host);
+   ws.close();
+ };
+
+}
+connect();
+</script>
+
+</body>
+</html>
